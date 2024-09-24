@@ -1,32 +1,33 @@
-from llama_cpp import Llama
-from llama_cpp.llama_chat_format import Llava15ChatHandler
+# from llama_cpp import Llama
+# from llama_cpp.llama_chat_format import Llava15ChatHandler
 import base64
-from groq import Groq
+from langchain_groq import ChatGroq
+import yaml
 
-client = Groq()
+with open("config.yaml", "r") as f:
+    config = yaml.safe_load(f)
+
+llm=ChatGroq(model_name = config["groq_model_names"]["llava_v1_7b"])
 
 def encode_image(image_file):
     return base64.b64encode(image_file.read()).decode('utf-8')
+
 def handle_image(uploaded_file, user_message):
-    print(user_message)
-    chat_completion = client.chat.completions.create(
-        messages=[
+    messages=[
+    {
+        "role": "user",
+        "content": [
+            {"type": "text", "text": user_message},
             {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": user_message},
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{encode_image(uploaded_file)}",
-                        },
-                    },
-                ],
-            }
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{encode_image(uploaded_file)}",
+                },
+            },
         ],
-        model="llava-v1.5-7b-4096-preview",
-    )
-    return chat_completion.choices[0].message.content
+    }
+    ]
+    return llm.invoke(messages).content
 
 # def convert_bytes_to_base64(image_bytes):
 #     encoded_string = base64.b64encode(image_bytes).decode("utf-8")

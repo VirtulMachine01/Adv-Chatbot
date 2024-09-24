@@ -96,7 +96,7 @@ def main():
         llm_chain.run("I will give the text which is extracted from audio, summarize that. Text from audio is ' " + transcribed_audio + " '")
 
     if voice_recording:
-        transcribed_audio = transcribe_audio(voice_recording)
+        transcribed_audio = transcribe_audio(voice_recording["bytes"])
         # print(transcribe_audio)
         llm_chain.run(transcribed_audio)
 
