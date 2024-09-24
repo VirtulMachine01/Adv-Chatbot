@@ -1,0 +1,23 @@
+Allthe time pdf embedding is done not using from the saved one...manage that when performing particular chattype
+
+1.  done    Here i am using the local model like mistral & llava so use finetuned model for particular task and for 
+            faster inference use grok models with api for project purpose only.
+
+2.  Make a chat option with text-to-text or image-to-text or pdf-to-chat
+
+3.  Make a proper usecases of and selction box for chat type and model type selection
+
+4.  add a image and audio input in the chat only..not on the sidebar and make a selection offor chatpdf chatimage or chattext
+
+5.  Advanced - 
+        Try to chat on image-to-image(auto bg setting, image matching, image merging, text-to-image)
+        Try to chat on Video-to-text, text-to-video,
+        Try with some cloud service so i can mention all type of concept, service and framework in this project
+        Try to add some chain of thoughts process inthe chat like chatgpt
+
+
+
+Model from groq 
+    1. Vision model - llava-v1.5-7b-4096-preview
+    2. Speech model - whisper-large-v3, distil-whisper-large-v3-en
+    3. Language model - llama3-70b-8192, llama3-8b-8192, llama-3.1-70b-versatile, llama-3.1-8b-instant

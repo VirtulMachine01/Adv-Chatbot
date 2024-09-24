@@ -1,0 +1,16 @@
+streamlit
+streamlit-mic-recorder
+langchain
+ctransformers
+transformers
+pyyaml
+librosa
+pypdfium2
+InstructorEmbedding
+huggingface
+torch
+langchain_community
+langchain_groq
+sentence_transformers
+faiss-cpu
+pypdf

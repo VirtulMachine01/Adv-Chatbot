@@ -1,0 +1,23 @@
+model_path:
+  small: "./models/mistral-7b-instruct-v0.2.Q3_K_M.gguf"
+  large: "./models/mistral-7b-instruct-v0.2.Q5_K_M.gguf"
+
+model_type : "mistral"
+
+groq_model_names:
+  llama3_8b: "llama3-8b-8192"
+  llama3_70b: "llama3-70b-8192"
+
+# embeddings_path: "BAAI/bge-large-en-v1.5"
+embeddings_path: "dunzhang/stella_en_1.5B_v5"
+embedding_name: "sentence-transformers/all-MiniLM-l6-v2"
+
+model_config: 
+  'max_new_tokens' : 512
+  'temperature' : 0
+  'context_length' : 4096
+  'gpu_layers' : 0
+
+chat_history_path: './chat_sessions/'
+vectordb_path: './faiss_db/'
+temp_pdf_path: './pdfs/'
