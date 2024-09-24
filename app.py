@@ -90,13 +90,14 @@ def main():
             add_documents_to_db(uploaded_pdf)
 
     if uploaded_audio:
-        transcribed_audio = transcribe_audio(uploaded_audio.getvalue())
-        print(transcribe_audio)
-        llm_chain.run("Summarize this audio" + transcribed_audio)
+        # transcribed_audio = transcribe_audio(uploaded_audio.getvalue())
+        transcribed_audio = transcribe_audio(uploaded_audio.read())
+        # print(transcribe_audio)
+        llm_chain.run("I will give the text which is extracted from audio, summarize that. Text from audio is ' " + transcribed_audio + " '")
 
     if voice_recording:
-        transcribed_audio = transcribe_audio(voice_recording["bytes"])
-        print(transcribe_audio)
+        transcribed_audio = transcribe_audio(voice_recording)
+        # print(transcribe_audio)
         llm_chain.run(transcribed_audio)
 
     if send_button or st.session_state.send_input:
@@ -106,7 +107,8 @@ def main():
                 if st.session_state.user_question != "":
                     user_message = st.session_state.user_question
                     st.session_state.user_question=""
-                llm_answer = handle_image(uploaded_image.getvalue(), st.session_state.user_question)
+                llm_answer = handle_image(uploaded_image, user_message)
+                # llm_answer = handle_image(uploaded_image.getvalue(), st.session_state.user_question)
                 chat_history.add_user_message(user_message)
                 chat_history.add_ai_message(llm_answer)
 
