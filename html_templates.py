@@ -28,6 +28,11 @@ css = '''
     width: 100%;
     padding: 0 1.5rem;
     color: #fff;
+    overflow-wrap: break-word; /* Break long words */
+    word-wrap: break-word; /* For older browsers */
+    white-space: pre-wrap; /* Preserve whitespace and wrap lines */
+    # max-height: 150px; /* Optional: limit height */
+    overflow-y: auto; /* Enable vertical scroll for overflow */
 }
 '''
 
