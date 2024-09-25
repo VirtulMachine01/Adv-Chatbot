@@ -70,7 +70,7 @@ def main():
     llm_chain = load_chain(chat_history)
 
 
-    user_input = st.text_input("Type your question here", key="user_input", on_change=set_send_input)
+    user_input = st.text_area("Type your question here", key="user_input", on_change=set_send_input)
 
     col1, voice_recording_column, send_button_column = st.columns([1, 1, 1])
 
@@ -80,7 +80,7 @@ def main():
     with voice_recording_column:
         voice_recording = mic_recorder(start_prompt="Start recording", stop_prompt="Stop Recording", just_once=True)
     with send_button_column:
-        send_button = st.button("Ask", key="send_button", on_click=clear_input_field)
+        send_button = st.button("Ask", key="send_button")
 
     uploaded_audio = st.sidebar.file_uploader("or upload an audio file", type = ["wav", "mp3", "ogg", "flac"])
     uploaded_image = st.sidebar.file_uploader("or upload an image file", type = ["jpg", "jpeg", "png"])
@@ -101,7 +101,7 @@ def main():
         # print(transcribe_audio)
         llm_chain.run(transcribed_audio)
 
-    if send_button or st.session_state.send_input:
+    if send_button or st.session_state.send_input and st.session_state.user_question != "":
         if uploaded_image:
             with st.spinner("Processing Image..."):
                 user_message = "Describe this image in detail please."
