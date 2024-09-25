@@ -5,6 +5,7 @@ from utils import save_chat_history_json, load_chat_history_json,get_timestamp
 from image_handler import handle_image
 from pdf_handler import add_documents_to_db
 from html_templates import css, get_bot_template, get_user_template
+from manage_limited_chats import manage_chat_sessions_folder
 from langchain_community.chat_message_histories import StreamlitChatMessageHistory
 from streamlit_mic_recorder import mic_recorder
 import yaml
@@ -127,6 +128,7 @@ def main():
                     st.write(get_bot_template(msg.content), unsafe_allow_html=True)
                 # st.chat_message(msg.type).write(msg.content)
     save_chat_history()
+    manage_chat_sessions_folder(max_files=3)
 
 if __name__ == "__main__":
     main()
