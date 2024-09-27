@@ -1,5 +1,4 @@
 from deep_translator import GoogleTranslator
-import textwrap
 import streamlit as st
 import pdfplumber
 from langchain_groq import ChatGroq
@@ -40,21 +39,26 @@ def translate_text(text):
         print(f"Error during translation: {e}")
         return ""
 
-def get_doman_of_document(text):
+def get_domain_of_document(text):
     """Get the domain of the document."""
     try:
         # Check if text is not empty
         if len(text) > 0:
             # Ensure the text is within the summarization model's limits
-            text = f"From the given content give the domain of document in 2 words only. Document is '{text}'"
+            text = f"From the given content give the domain of document in four(4) words only. Document is '{text}'"
             domain_name = summarization_model.invoke(text)
-            return domain_name
+            # Check if the response has the expected content field
+            if hasattr(domain_name, 'content'):
+                return domain_name.content
+            else:
+                # print("No valid content found in the response.")
+                return "No valid content found in the response."
         else:
-            print("No text to domain.")
-            return ""
+            # print("No text to determine the domain.")
+            return "No text to determine the domain."
     except Exception as e:
-        print(f"Error during domain finding: {e}")
-        return ""
+        # print(f"Error during domain finding: {e}")
+        return "Error during domain finding: {e}"
 
 def summarize_text(text):
     """Summarize English text."""    
@@ -64,37 +68,19 @@ def summarize_text(text):
             # Ensure the text is within the summarization model's limits
             text = f"Summarize the following text in 100-200 words only. '{text}'"
             summary = summarization_model.invoke(text)
-            return summary
+
+            # # Check if the response has the expected content field
+            if hasattr(summary, 'content'):
+                return summary.content
+            else:
+                # print("No valid content found in the response.")
+                return "No valid content found in the response."
         else:
-            print("No text to summarize.")
-            return ""
+            # print("No text to summarize.")
+            return "No text to summarize."
     except Exception as e:
-        print(f"Error during summarization: {e}")
-        return ""
-
-# def process_long_text(long_text, chunk_size=1000):
-#     """Process a long text: translate and summarize."""
-#     # Split the long text into manageable chunks
-#     chunks = textwrap.wrap(long_text, width=chunk_size, break_long_words=False)
-    
-#     translated_chunks = []
-#     for chunk in chunks:
-#         translated_chunk = translate_text(chunk)
-#         if translated_chunk:  # Ensure translated chunk is not empty
-#             translated_chunks.append(translated_chunk)
-    
-#     # Combine all translated chunks
-#     combined_translated_text = " ".join(translated_chunks)
-#     st.write("Total Tokens:- ",len(combined_translated_text)) # +54 other
-#     # print(combined_translated_text)
-
-#     # Only summarize if we have valid translated text
-#     if combined_translated_text.strip():  # Check if there's any valid translated text
-#         summary = summarize_text(combined_translated_text)
-#         domain_name = get_doman_of_document(combined_translated_text)
-#         return summary.content, domain_name.content, combined_translated_text
-#     else:
-#         return "No valid translated text available for summarization."
+        # print(f"Error during summarization: {e}")
+        return "Error during summarization: {e}"
 
 def process_long_text(pages_text, chunk_size=1000):
     """Process each page of text separately: translate and summarize."""
@@ -113,8 +99,8 @@ def process_long_text(pages_text, chunk_size=1000):
     # Only summarize if we have valid translated text
     if combined_translated_text.strip():  # Check if there's any valid translated text
         summary = summarize_text(combined_translated_text)
-        domain_name = get_doman_of_document(combined_translated_text)
-        return summary.content, domain_name.content, translated_pages
+        domain_name = get_domain_of_document(combined_translated_text)
+        return summary, domain_name, translated_pages
     else:
         return "No valid translated text available for summarization.", "", ""
 
@@ -171,10 +157,11 @@ def break_long_words_in_text_list(text_list, max_length=15):
 st.title("PDF Summary Translator")
 st.write("Upload a PDF file containing Chinese text, and get an English summary.")
 
-uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
+uploaded_file = st.file_uploader("Choose a PDF file", type=["pdf",])
 
 if uploaded_file is not None:
     start_time_main = time.time()
+
     # Extract text from the PDF
     with st.spinner("Extracting text from the PDF..."):
         pages_text = extract_text_from_pdf_pagewise(uploaded_file)  # List of text per page
@@ -205,28 +192,3 @@ if uploaded_file is not None:
         st.write(f"Total time taken for the entire process: {(time.time() - start_time_main):.2f} seconds")
     else:
         st.warning("No text could be extracted from the PDF.")
-
-# if uploaded_file is not None:
-#     # Extract text from the PDF
-#     with st.spinner("Extracting text from the PDF..."):
-#         extracted_text = extract_text_from_pdf(uploaded_file)
-
-#     if extracted_text:
-#         # Process the long text
-#         with st.spinner("Generating Summary..."):
-#             english_summary, domain_name, translated_text = process_long_text(extracted_text)
-
-#         # Display the summary
-#         st.subheader("Doamain of Document:")
-#         st.write(domain_name)
-
-#         st.subheader("Summary:")
-#         st.write(english_summary)
-
-#         with st.expander("See extracted text from PDF"):
-#             st.write(extracted_text)
-
-#         with st.expander("See Translated text from PDF"):
-#             st.write(translated_text)
-#     else:
-#         st.warning("No text could be extracted from the PDF.")
