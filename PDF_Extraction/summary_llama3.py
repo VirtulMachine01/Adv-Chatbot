@@ -1,7 +1,9 @@
 from deep_translator import GoogleTranslator
 import streamlit as st
 import pdfplumber
+from fpdf import FPDF
 from langchain_groq import ChatGroq
+from langchain_community.document_loaders import UnstructuredPowerPointLoader
 import os
 import re
 import time
@@ -9,17 +11,41 @@ from dotenv import load_dotenv
 load_dotenv()
 os.environ['GROQ_API_KEY'] = os.getenv("GROQ_API_KEY")
 
-summarization_model = ChatGroq(model_name = "llama-3.1-70b-versatile")
-# summarization_model = ChatGroq(model_name = "llama-3.1-8b-instant")
+# summarization_model = ChatGroq(model_name = "llama-3.1-70b-versatile")
+summarization_model = ChatGroq(model_name = "llama-3.1-8b-instant")
 
-def extract_text_from_pdf(pdf_path):
-    all_text = ""
-    with pdfplumber.open(pdf_path) as pdf:
-        for page in pdf.pages:
-            text = page.extract_text()
-            if text:
-                all_text += text + "\n\n\n\n"
-    return all_text
+def extract_text_from_ppt_pagewise(file):
+    """
+    Extracts text from a PowerPoint file and groups text based on page numbers.
+    Args:
+        file: File object, which could be a path or BytesIO object for Streamlit uploads.
+    Returns:
+        List of pagewise text contents sorted by page number.
+    """
+    # Load the PowerPoint file from BytesIO or file path in elements mode
+    loader = UnstructuredPowerPointLoader(file, mode="elements")
+    documents = loader.load()
+
+    # Dictionary to hold text grouped by page number
+    pagewise_text = {}
+
+    # Group text based on page_number and avoid empty page content
+    for doc in documents:
+        page_number = doc.metadata.get("page_number", None)
+
+        # Skip pages with None or empty content
+        if page_number is None or not doc.page_content.strip():
+            continue  # Skip this entry if no page number or content is empty
+
+        # Initialize the key if not already present and concatenate text
+        if page_number not in pagewise_text:
+            pagewise_text[page_number] = doc.page_content
+        else:
+            pagewise_text[page_number] += f" {doc.page_content}"  # Concatenate with a space for better readability
+
+    # Convert the grouped text to a list, sorted by page number
+    sorted_pagewise_text = [text for _, text in sorted(pagewise_text.items())]
+    return sorted_pagewise_text
 
 def extract_text_from_pdf_pagewise(pdf_path):
     pages_text = []
@@ -38,6 +64,23 @@ def translate_text(text):
     except Exception as e:
         print(f"Error during translation: {e}")
         return ""
+    
+def generate_text_pdf(translated_docs, FONT_SIZE = 8, FONT_STYLE = "Arial", MARGIN = 10, LINE_SPACE = 5, PDF_NAME = "generated_pdf.pdf"):
+    # Create a PDF object
+    pdf = FPDF(orientation='P', unit='mm', format='A4') # P:portrait, L:Landscape, 'mm': Millimeters (default), 'pt': Points (1 point = 1/72 of an inch), 'cm': Centimeters, 'in': Inches
+    pdf.set_auto_page_break(auto=True, margin=MARGIN)
+    pdf.set_font(FONT_STYLE, size=FONT_SIZE)
+
+    # Loop through each Document object and add its content to a new page
+    for doc in translated_docs:
+        pdf.add_page()
+        pdf.multi_cell(0, LINE_SPACE, doc.encode('latin-1', 'replace').decode('latin-1'))  # Encode with 'replace' to handle unsupported chars
+
+    # Save the PDF file
+    pdf_filename = PDF_NAME
+    pdf.output(pdf_filename)
+
+    print(f"PDF '{pdf_filename}' created successfully.")
 
 def get_domain_of_document(text):
     """Get the domain of the document."""
@@ -92,6 +135,9 @@ def process_long_text(pages_text, chunk_size=1000):
             translated_pages.append(translated_text)  # Append translated page
     # Combine all translated pages with a delimiter
     combined_translated_text = " ".join(translated_pages)
+
+    #Generating PDF
+    generate_text_pdf(translated_pages)
     
     # Display total tokens and translated text (optional)
     st.write("Total Tokens:", len(combined_translated_text))  # +54 other overheads
@@ -157,14 +203,31 @@ def break_long_words_in_text_list(text_list, max_length=15):
 st.title("PDF Summary Translator")
 st.write("Upload a PDF file containing Chinese text, and get an English summary.")
 
-uploaded_file = st.file_uploader("Choose a PDF file", type=["pdf",])
+uploaded_file = st.file_uploader("Choose a PDF file", type=["pdf", "ppt", "pptx"])
+
 
 if uploaded_file is not None:
     start_time_main = time.time()
 
-    # Extract text from the PDF
-    with st.spinner("Extracting text from the PDF..."):
-        pages_text = extract_text_from_pdf_pagewise(uploaded_file)  # List of text per page
+    file_type = uploaded_file.name.split('.')[-1]
+
+    pages_text = None
+
+    if file_type == "pdf":
+        # Extract text from the PDF
+        with st.spinner("Extracting text from the PDF..."):
+            pages_text = extract_text_from_pdf_pagewise(uploaded_file)  # List of text per page
+    elif file_type in ["ppt", "pptx"]:
+        # Extract text from the PDF
+        with st.spinner("Extracting text from the PDF..."):
+            with open("temp_uploaded_file.ppt", "wb") as temp_file:
+                temp_file.write(uploaded_file.read())
+
+            # Extract text from the saved temporary file
+            pages_text = extract_text_from_ppt_pagewise("temp_uploaded_file.ppt")
+            os.remove("temp_uploaded_file.ppt")
+    else:
+        st.write(f"Unsupported file type: {uploaded_file.type}")
 
     if pages_text:
         # Process the long text for translation and summarization
@@ -185,6 +248,7 @@ if uploaded_file is not None:
 
         # Show the translated text with page separations in an expander
         with st.expander("See translated text with page breaks"):
+
             updated_translated_text_list = break_long_words_in_text_list(translated_text_list, max_length=15)
             for i, page_text in enumerate(updated_translated_text_list, 1):
                 st.write(f"**Page {i}:**\n\n{page_text}")
