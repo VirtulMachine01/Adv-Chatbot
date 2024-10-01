@@ -53,6 +53,57 @@ def extract_text_from_pdf_pagewise(uploaded_file):
         list_docs.append(doc.page_content)
     return list_docs
 
+from collections import defaultdict
+from langchain.schema import Document
+
+def merge_documents_by_page(documents):
+    # Use defaultdict to group content by page_number
+    merged_pages = defaultdict(str)  # Dictionary to store merged content for each page_number
+    metadata_by_page = {}  # Dictionary to store metadata for each page_number
+    
+    for doc in documents:
+        page_number = doc.metadata.get('page_number', None)
+        if page_number is not None:
+            # Merge content for the same page number
+            merged_pages[page_number] += doc.page_content + "\n"  # Add a newline between merged contents
+            # Store the metadata (we'll use the metadata from the first occurrence of each page number)
+            if page_number not in metadata_by_page:
+                metadata_by_page[page_number] = doc.metadata
+    
+    # Create new Document objects with the merged content
+    merged_documents = []
+    for page_number, content in merged_pages.items():
+        # Create a new Document object with merged content and metadata
+        merged_doc = Document(
+            page_content=content.strip(),  # Strip to remove any extra leading/trailing spaces or newlines
+            metadata=metadata_by_page[page_number]
+        )
+        merged_documents.append(merged_doc)
+
+    return merged_documents
+
+
+def extract_documents_from_ppt(uploaded_file):
+    file = generate_temp_file(uploaded_file)
+    loader = UnstructuredPowerPointLoader(file, mode="elements")
+    documents = loader.load()
+    merged_docs = merge_documents_by_page(documents)
+    delete_temp_file(get_filetype(uploaded_file))
+    return merged_docs
+
+def extract_documents_from_pdf(uploaded_file):
+    pdf_file = generate_temp_file(uploaded_file)
+    pdf_loader = PyPDFLoader(pdf_file)
+    documents = pdf_loader.load_and_split()
+    delete_temp_file(get_filetype(uploaded_file))
+    return documents
+
+
+
+
+
+
+
 # Return textlist with chinese content
 # import pdfplumber
 # def extract_text_from_pdf_pagewise(pdf_path):
