@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Structures Tutor Chatbot</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 600px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            overflow: hidden; /* Prevent overflow */
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            resize: vertical; /* Allow vertical resizing */
+        }
+
+        textarea {
+            max-height: 150px; /* Limit the height of text areas */
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 10px;
+            display: block;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #response-section, #conversation-section {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 20px;
+            display: none; /* Hide by default */
+            max-height: 300px; /* Set a max height */
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+
+        #response-section {
+            border-left: 5px solid #4CAF50;
+        }
+
+        #custom-question-section {
+            display: none;
+        }
+
+        .response-content, .question-block {
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Data Structures Tutor</h1>
+
+        <form id="chat-form">
+            <label for="algorithm">Select a topic to learn or ask a custom question:</label>
+            <select id="algorithm" name="algorithm">
+                <option value="">--Choose a topic--</option>
+                <option value="Linked List">Linked List</option>
+                <option value="Stack">Stack</option>
+                <option value="Queue">Queue</option>
+                <option value="Tree">Tree</option>
+                <option value="Graph">Graph</option>
+                <option value="Ask a Question">Ask a Question</option>
+            </select>
+
+            <div id="custom-question-section">
+                <label for="user_question">Enter your question:</label>
+                <textarea id="user_question" name="user_question"></textarea>
+            </div>
+
+            <div id="conversation-section">
+                <p><strong>Question:</strong> <br><span id="question" class="question-block"></span></p>
+                <label for="answer">Your Answer:</label>
+                <textarea id="answer" name="answer"></textarea>
+            </div>
+
+            <button type="submit">Submit</button>
+        </form>
+
+        <!-- Response section to show the chatbot's response -->
+        <div id="response-section">
+            <p><strong>Response:</strong> <br><span id="response" class="response-content"></span></p>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('chat-form');
+        const responseSection = document.getElementById('response-section');
+        const conversationSection = document.getElementById('conversation-section');
+        const customQuestionSection = document.getElementById('custom-question-section');
+        const questionElement = document.getElementById('question');
+        const responseElement = document.getElementById('response');
+        let lastQuestion = "";
+
+        // Show or hide the custom question section based on dropdown selection
+        const algorithmSelect = document.getElementById('algorithm');
+        algorithmSelect.addEventListener('change', function() {
+            if (algorithmSelect.value === "Ask a Question") {
+                customQuestionSection.style.display = 'block';
+                conversationSection.style.display = 'none';
+            } else {
+                customQuestionSection.style.display = 'none';
+                conversationSection.style.display = 'block';
+            }
+        });
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const algorithm = document.getElementById('algorithm').value;
+            const userAnswer = document.getElementById('answer').value;
+            const userQuestion = document.getElementById('user_question').value;
+
+            if (!algorithm) {
+                alert('Please select a topic before submitting.');
+                return;
+            }
+
+            const data = {
+                algorithm: algorithm,
+                answer: userAnswer,
+                user_question: userQuestion,
+                last_question: lastQuestion
+            };
+
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.question) {
+                    lastQuestion = data.question;
+                    questionElement.textContent = data.question;
+                    conversationSection.style.display = 'block';
+                    document.getElementById('answer').value = ""; // Clear the answer field
+                }
+
+                if (data.response) {
+                    responseElement.textContent = data.response;
+                    responseSection.style.display = 'block';
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

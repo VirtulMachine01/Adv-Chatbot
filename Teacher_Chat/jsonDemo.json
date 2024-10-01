@@ -1,0 +1,20 @@
+content='Here\'s a Socratic question that could help the student deepen their understanding of Linked Lists:\n\n"Suppose you\'re given a Linked List with the following nodes: A -> B -> C -> D. If you want to insert a new node \'E\' between nodes \'B\' and \'C\', what specific steps would you need to take to ensure that the new node is correctly inserted and the rest of the list remains intact?"\n\nThis question encourages the student to think about the relationships between nodes, how to handle node insertion, and how to maintain the integrity of the list. It also helps them consider the edge cases, such as updating the `next` pointer of the previous node and the `prev` pointer of the next node (if the list is doubly linked).' 
+additional_kwargs={} 
+response_metadata={'token_usage': {'completion_tokens': 155,
+                                    'prompt_tokens': 64,
+                                    'total_tokens': 219,
+                                    'completion_time': 0.62,
+                                    'prompt_time': 0.015081878,
+                                    'queue_time': 0.005210912000000002,
+                                    'total_time': 0.635081878
+                                    }, 
+                    'model_name': 'llama-3.1-70b-versatile',
+                    'system_fingerprint': 'fp_b3ae7e594e',
+                    'finish_reason': 'stop',
+                    'logprobs': None
+                    }
+id='run-10a133de-2f20-483b-907e-98d326995e44-0' 
+usage_metadata={'input_tokens': 64, 
+                'output_tokens': 155, 
+                'total_tokens': 219
+                }
