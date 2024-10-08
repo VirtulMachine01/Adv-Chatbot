@@ -8,8 +8,8 @@ os.environ['GROQ_API_KEY'] = "gsk_Cr0Nd2578YTeoP3a3s7EWGdyb3FYxtVDvTUcMDOmlS8nCO
 # os.environ['GROQ_API_KEY'] = os.getenv("GROQ_API_KEY")
 
 # LLm model using GOQ online but versy fast but limits
-llm = ChatGroq(model_name = "llama-3.1-70b-versatile")
-# llm = ChatGroq(model_name = "llama-3.1-8b-instant")
+# llm = ChatGroq(model_name = "llama-3.1-70b-versatile")
+llm = ChatGroq(model_name = "llama-3.1-8b-instant")
 
 # LLM model using Ollama on system offline
 # from langchain_community.llms import Ollama
@@ -79,7 +79,7 @@ def summarize_map_reduce(translated_docs):
     response = map_reduce_chain({"input_documents":translated_docs})
     return response
 
-def title_of_document(translated_docs):
+def title_of_document_map_reduce(translated_docs):
     map_reduce_chain = create_map_reduce_chain(llm, main_prompt, title_prompt)
     response = map_reduce_chain({"input_documents":translated_docs})
     return response

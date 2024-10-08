@@ -5,6 +5,7 @@ from llm_call import get_domain_of_document, summarize_text_stuff
 # from formate_text import break_long_words_in_text_list
 import streamlit as st
 import time
+import json
 
 # Streamlit UI
 st.title("PDF Summary Translator")
@@ -91,12 +92,40 @@ uploaded_file = st.file_uploader("Choose a PDF file", type=["pdf", "ppt", "pptx"
 #         st.warning("No text could be extracted from the PDF.")
 
 from text_extraction import extract_documents_from_pdf, extract_documents_from_ppt
-from llm_call import make_data_frame, page_wise_summary, title_of_document_refine, summarize_refine
+from llm_call import make_data_frame, page_wise_summary, title_of_document_refine, summarize_refine, summarize_map_reduce, title_of_document_map_reduce
 from translation import translate_document
+from token_generator import generate_tokens
+
+# Initial dictionary structure
+result_json = {
+"file_name": "",
+"metadata": {
+        "title": "",
+        "total_pages": None,
+        "tokens": []
+    },
+"document_summary": "",
+"pages": []  # Initialize as an empty list
+}
+
+def page_json_obj():
+    page_json = {
+    "page_number": 0,
+    "content": {
+            "extracted_text": "",
+            "translated_text": "",
+            "page_summary": ""
+        }
+    }
+    return page_json
+
+
 if uploaded_file is not None:
     start_time_main = time.time()
 
     file_type = uploaded_file.name.split('.')[-1]
+    file_name = uploaded_file.name
+    result_json["file_name"] = file_name
 
     page_docs = None
 
@@ -113,6 +142,10 @@ if uploaded_file is not None:
 
     st.write(f"Extraction Time: {(time.time() - start_time_main):.2f} seconds")
     start_time_main1 = time.time()
+
+    total_page = len(page_docs)
+    result_json["metadata"]["total_pages"] = total_page
+
     if page_docs:
         # Process the long text for translation and summarization
         with st.spinner("Translating Text..."):
@@ -127,30 +160,33 @@ if uploaded_file is not None:
                 translated_docs_list.append(doc.page_content)
             generate_text_pdf(translated_docs_list)
 
+        tokens = generate_tokens(translated_docs_list)
+        result_json["metadata"]["tokens"] = tokens
+
         st.write(f"PDF Generation Time: {(time.time() - start_time_main1):.2f} seconds")
         start_time_main1 = time.time()
 
         with st.spinner("Generating Title..."):
-            # domain_name = title_of_document(translated_docs)
-            domain_name = title_of_document_refine(translated_docs)
+            domain_name = title_of_document_map_reduce(translated_docs)
+            result_json["metadata"]["title"] = domain_name['output_text']
+            # domain_name = title_of_document_refine(translated_docs)
 
         st.write(f"Title Time: {(time.time() - start_time_main1):.2f} seconds")
         start_time_main1 = time.time()
 
         with st.spinner("Generating Summary..."):
-            # english_summary = summarize_map_reduce(translated_docs)
-            english_summary = summarize_refine(translated_docs)
+            english_summary = summarize_map_reduce(translated_docs)
+            result_json["document_summary"] = english_summary['output_text']
+            # english_summary = summarize_refine(translated_docs)
 
         st.write(f"Summary Time: {(time.time() - start_time_main1):.2f} seconds")
         start_time_main1 = time.time()
 
         # Display the domain name and summary
         with st.expander("See title of the Document"):
-            # st.subheader("Title of Document:")
             st.write(domain_name['output_text'])
 
         with st.expander("See Summary from PDF"):
-            # st.subheader("Summary:")
             st.write(english_summary['output_text'])
 
         # Show original extracted text with page separations in an expander
@@ -158,17 +194,29 @@ if uploaded_file is not None:
             for i, page_text in enumerate(page_docs, 1):
                 st.write(f"**Page {i}:**\n\n{page_text.page_content}")  # Show each page separately
 
+                page_json = page_json_obj()
+                page_json["page_number"] = i
+                page_json["content"]["extracted_text"] = page_text.page_content
+                result_json["pages"].append(page_json)
+
         # Show the translated text with page separations in an expander
         with st.expander("See translated text with page breaks"):
             for i, page_text in enumerate(translated_docs_list, 1):
                 st.write(f"**Page {i}:**\n\n{page_text}")
-        
+
+                if result_json["pages"][i-1]["page_number"] == i:
+                    result_json["pages"][i-1]["content"]["translated_text"] = page_text
+
         with st.expander("See the Page wise Summary"):
-            print(english_summary)
             sum_df = make_data_frame(english_summary)
             for i, page_text in enumerate(translated_docs_list, 1):
                 st.write(f"**Page {i}:**\n\n{page_wise_summary(sum_df, i-1, "concise_summary")}")
+
+                if result_json["pages"][i-1]["page_number"] == i:
+                    result_json["pages"][i-1]["content"]["page_summary"] = page_wise_summary(sum_df, i-1, "concise_summary")
         
+        result_json = json.dumps(result_json, indent=4, ensure_ascii=False)
+        print(result_json)
         st.write(f"Total time taken for the entire process: {(time.time() - start_time_main):.2f} seconds")
     else:
         st.warning("No text could be extracted from the PDF.")

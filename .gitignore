@@ -2,3 +2,4 @@ models/**
 !models/*.txt
 chatenv
 .env
+PDF_Extraction/data

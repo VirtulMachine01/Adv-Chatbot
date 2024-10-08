@@ -1,0 +1,35 @@
+{
+    "file_name": "uploaded_pdf_name.pdf",
+    "metadata": {
+      "title": "Title of the Document",
+      "total_pages": 3,
+      "tokens": "This field will contain the first 100 tokens extracted from the entire document."
+    },
+    "document_summary": "This is a summary of the whole document.",
+    "pages": [
+      {
+        "page_number": 1,
+        "content": {
+          "extracted_text": "Extracted text from page 1.",
+          "translated_text": "Translated text of page 1 in English.",
+          "page_summary": "Summary of page 1."
+        }
+      },
+      {
+        "page_number": 2,
+        "content": {
+          "extracted_text": "Extracted text from page 2.",
+          "translated_text": "Translated text of page 2 in English.",
+          "page_summary": "Summary of page 2."
+        }
+      },
+      {
+        "page_number": 3,
+        "content": {
+          "extracted_text": "Extracted text from page 3.",
+          "translated_text": "Translated text of page 3 in English.",
+          "page_summary": "Summary of page 3."
+        }
+      }
+    ]
+}  
