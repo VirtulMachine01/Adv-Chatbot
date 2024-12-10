@@ -1,4 +1,4 @@
-Conversaional AI Chatbot
+<h5>Conversaional AI Chatbot</h5>
 
 A powerful multimodal conversational chatbot capable of interacting with text, audio, images, and PDFs. Built using advanced AI frameworks, this chatbot combines state-of-the-art language models and data retrieval techniques to deliver seamless and intelligent interactions.
 
@@ -16,6 +16,11 @@ Frontend: Streamlit
 Backend: FAISS, llama3, all-MiniLM, sqlite3, Langchain
 Language Model: Llama 3.2 11b vision, 
 Version Control: Git, GitHub
+
+[Live Demo](https://example.com/demo](https://chat-all-mit-patel.streamlit.app/) 
+
+![Snapshot 1 with Text Input](./snapshots/Screenshot1.png "Chatbot Example Interaction")
+
 
 <h3>How It Works</h3>
 
