@@ -14,8 +14,8 @@ Streamlined Deployment: Deployed on Streamlit Cloud for ease of access with a re
 <h3>Tech Stack</h3>
 <pre>
 Frontend: Streamlit
-Backend: FAISS, llama3, all-MiniLM, sqlite3, Langchain
-Language Model: Llama 3.2 11b vision, 
+Backend: FAISS(PDF Vector data), llama3(text + image tasks), all-MiniLM(embedding model), sqlite3(chat session), Langchain
+Language Model: Llama 3.2 11b vision
 Version Control: Git, GitHub
 </pre>
 <br>
