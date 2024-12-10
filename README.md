@@ -16,11 +16,19 @@ Frontend: Streamlit
 Backend: FAISS, llama3, all-MiniLM, sqlite3, Langchain
 Language Model: Llama 3.2 11b vision, 
 Version Control: Git, GitHub
-
+<br>
+<br>
 [Live Demo](https://example.com/demo](https://chat-all-mit-patel.streamlit.app/) 
+<br>
+<h3> Snapshots </h3>
+1. Text Input
+![Snapshot 1 with Text Input](./snapshots/Screenshot1.png "Chatbot Example with Text Input")
 
-![Snapshot 1 with Text Input](./snapshots/Screenshot1.png "Chatbot Example Interaction")
+2. Image Input
+![Snapshot 2 with Text Input](./snapshots/Screenshot2.png "Chatbot Example with Image Input")
 
+3. PDF Input
+![Snapshot 3 with Text Input](./snapshots/Screenshot3.png "Chatbot Example with PDF Input")
 
 <h3>How It Works</h3>
 
