@@ -20,7 +20,7 @@ Version Control: Git, GitHub
 </pre>
 <br>
 <br>
-[Live Demo](https://example.com/demo](https://chat-all-mit-patel.streamlit.app/) 
+[Live Demo](https://chat-all-mit-patel.streamlit.app/) 
 <br>
 
 <h3> Snapshots </h3>
